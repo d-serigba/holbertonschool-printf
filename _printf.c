@@ -123,3 +123,97 @@ int _printf(const char *format, ...)
     
     return (count);
 }
+
+/**
+ * print_number - Prints an integer
+ * @n: The integer to print
+ *
+ * Return: Number of characters printed
+ */
+int print_number(int n)
+{
+	int count = 0;
+	unsigned int num;
+
+	if (n < 0)
+	{
+		_putchar('-');
+		count++;
+		num = -n;
+	}
+	else
+	{
+		num = n;
+	}
+
+	if (num / 10)
+		count += print_number(num / 10);
+
+	_putchar((num % 10) + '0');
+	count++;
+
+	return (count);
+}
+
+/**
+ * _printf - Custom printf function
+ * @format: Format string containing text and format specifiers
+ *
+ * Return: Number of characters printed
+ */
+int _printf(const char *format, ...)
+{
+	va_list args;
+	int i = 0, count = 0;
+
+	if (format == NULL)
+		return (-1);
+
+	va_start(args, format);
+
+	while (format[i])
+	{
+		if (format[i] == '%')
+		{
+			i++;
+			if (format[i] == '\0')
+				return (-1);
+
+			if (format[i] == 'd' || format[i] == 'i')
+			{
+				count += print_number(va_arg(args, int));
+			}
+			else if (format[i] == '%')
+			{
+				_putchar('%');
+				count++;
+			}
+			else
+			{
+				_putchar('%');
+				_putchar(format[i]);
+				count += 2;
+			}
+		}
+		else
+		{
+			_putchar(format[i]);
+			count++;
+		}
+		i++;
+	}
+
+	va_end(args);
+	return (count);
+}
+
+/**
+ * _putchar - Writes a character to stdout
+ * @c: The character to print
+ *
+ * Return: On success 1, on error -1
+ */
+int _putchar(char c)
+{
+	return (write(1, &c, 1));
+}
