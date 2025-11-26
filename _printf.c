@@ -1,124 +1,125 @@
 #include "main.h"
 
 /**
- * _putchar - Writes the character c to stdout
- * @c: The character to print
+ * print_char - affiche un caractère
+ * @args: liste des arguments variables
  *
- * Return: On success 1. On error, -1 is returned.
+ * Return: nombre de caractères imprimés (toujours 1)
  */
-int _putchar(char c)
+int print_char(va_list args)
 {
-	return (write(1, &c, 1));
+    char c = va_arg(args, int);
+    
+    _putchar(c);
+    return (1);
 }
 
 /**
- * print_char - Prints a character
- * @list: va_list containing the character argument
+ * print_string - affiche une chaîne de caractères
+ * @args: liste des arguments variables
  *
- * Return: 1 (number of characters printed)
+ * Return: nombre de caractères imprimés
  */
-int print_char(va_list list)
+int print_string(va_list args)
 {
-	char c = va_arg(list, int); /* char est promu à int */
-
-	return (_putchar(c));
-}
-
-/**
- * print_string - Prints a string
- * @list: va_list containing the string argument
- *
- * Return: Number of characters printed
- */
-int print_string(va_list list)
-{
-	char *s = va_arg(list, char *);
-	int count = 0;
-
-	/* Gérer le cas où la chaîne est NULL */
-	if (s == NULL)
-		s = "(null)";
-
-	while (*s)
-	{
-		_putchar(*s++);
-		count++;
-	}
-
-	return (count);
-}
-
-/**
- * print_percent - Prints a percent sign
- * @list: va_list (unused)
- *
- * Return: 1 (number of characters printed)
- */
-int print_percent(__attribute__((unused))va_list list)
-{
-	return (_putchar('%'));
-}
-
-/* --- Fonctions pour Exercice 2 (d, i) --- */
-
-/**
- * print_number - Helper function to print a positive number recursively
- * @n: The number to print
- *
- * Return: Number of characters printed
- */
-int print_number(long int n)
-{
+    char *str = va_arg(args, char *);
     int count = 0;
     
-    if (n < 0)
+    /* Si la chaîne est NULL, on affiche "(null)" */
+    if (str == NULL)
+        str = "(null)";
+    
+    /* On parcourt la chaîne caractère par caractère */
+    while (str[count])
     {
-        /* Ne devrait pas arriver ici si bien géré dans print_integer */
-        n = -n;
-    }
-
-    if (n / 10)
-    {
-        count += print_number(n / 10);
+        _putchar(str[count]);
+        count++;
     }
     
-    _putchar((n % 10) + '0');
-    count++;
-
     return (count);
 }
 
 /**
- * print_integer - Handles the %d and %i specifiers
- * @list: The va_list containing the integer argument
+ * print_percent - affiche le symbole %
+ * @args: liste des arguments (non utilisée ici)
  *
- * Return: Number of characters printed
+ * Return: nombre de caractères imprimés (toujours 1)
  */
-int print_integer(va_list list)
+int print_percent(va_list args)
 {
-    int n = va_arg(list, int);
-    int printed_chars = 0;
+    (void)args; /* On ignore l'argument */
     
-    /* Gérer le signe */
-    if (n < 0)
+    _putchar('%');
+    return (1);
+}
+
+/**
+ * handle_format - gère les spécificateurs de format
+ * @format: le caractère après le %
+ * @args: liste des arguments variables
+ *
+ * Return: nombre de caractères imprimés, ou -1 si format invalide
+ */
+int handle_format(char format, va_list args)
+{
+    if (format == 'c')
+        return (print_char(args));
+    else if (format == 's')
+        return (print_string(args));
+    else if (format == '%')
+        return (print_percent(args));
+    
+    /* Si le format n'est pas reconnu, on affiche % suivi du caractère */
+    _putchar('%');
+    _putchar(format);
+    return (2);
+}
+
+/**
+ * _printf - produit une sortie selon un format
+ * @format: chaîne de format contenant des directives
+ *
+ * Return: le nombre de caractères imprimés
+ */
+int _printf(const char *format, ...)
+{
+    va_list args;
+    int i = 0;
+    int count = 0;
+    
+    /* Si format est NULL, on retourne -1 */
+    if (format == NULL)
+        return (-1);
+    
+    /* On initialise la liste d'arguments variables */
+    va_start(args, format);
+    
+    /* On parcourt la chaîne format caractère par caractère */
+    while (format[i])
     {
-        printed_chars += _putchar('-');
-        
-        /* Gérer INT_MIN sans débordement en castant en unsigned */
-        if (n == -2147483648) /* INT_MIN */
+        /* Si on trouve un %, on traite le spécificateur qui suit */
+        if (format[i] == '%')
         {
-            /* Affichage du signe géré, on passe la valeur absolue en unsigned long */
-            printed_chars += print_number(2147483648UL);
+            i++; /* On passe au caractère après % */
+            
+            /* Si on arrive à la fin de la chaîne après %, on arrête */
+            if (format[i] == '\0')
+                break;
+            
+            /* On traite le spécificateur de format */
+            count += handle_format(format[i], args);
         }
         else
         {
-            printed_chars += print_number(-n);
+            /* Sinon, on affiche simplement le caractère */
+            _putchar(format[i]);
+            count++;
         }
+        i++;
     }
-    else
-    {
-        printed_chars += print_number(n);
-    }
-
-    return (printed_chars);
+    
+    /* On nettoie la liste d'arguments */
+    va_end(args);
+    
+    return (count);
 }
