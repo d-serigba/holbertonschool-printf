@@ -15,7 +15,7 @@ This will deepen our understanding of formatting, memory management, and how sta
 
 **Flowchart :**
 
-*insérer image flowhart*
+![Flowchart G](holbertonschool-printf/Flowchart G.png)
 
 **Command Compilation** :
 
